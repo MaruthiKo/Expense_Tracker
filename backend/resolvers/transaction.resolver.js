@@ -1,6 +1,6 @@
 const transactionResolver = {
     Query:{
-        transactions: async (_,_, context) => {
+        transactions: async (_, __, context) => {
             try{
                 if(!context.getUser()) throw new Error("Unauthorized");
                 const userId = await context.getUser()._id;
@@ -37,7 +37,7 @@ const transactionResolver = {
                 throw new Error("Error creating transaction");
             }
         },
-        upadteTransaction: async (_, { input }) => {
+        updateTransaction: async (_, { input }) => {
             try{   
                 const updatedTransaction = await Transaction.findByIdAndUpdate(input.transactionId, input, {new:true});
                 return updatedTransaction;

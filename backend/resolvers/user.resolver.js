@@ -1,4 +1,3 @@
-import { users } from '../dummyData/data.js';
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 
@@ -35,14 +34,15 @@ const userResolver = {
                 await context.login(newUser);
                 return newUser;
             } catch (err){
-                console.error("Error is signUp: ", err);
+                console.error("Error in signUp: ", err);
                 throw new Error(err.message || "Internal server error"); 
             }
         },
 
         login: async (_, { input }, context) => {
             try {
-                const {username, password } = input;
+                const { username, password } = input;
+                if (!username || !password) throw new Error("All Fields are required");
                 const { user } = await context.authenticate("graphql-local",{username, password});
                 
                 await context.login(user);
@@ -53,13 +53,13 @@ const userResolver = {
                 throw new Error(err.message || "Internal server error");
             }
         },
-        logout: async(_,_, context) => {
+        logout: async(_, __, context) => {
             try {
                 await context.logout();
-                req.session.destroy((err) => {
+                context.req.session.destroy((err) => {
                     if (err) throw err;
                 })
-                res.clearCookie("connect.sid");
+                context.res.clearCookie("connect.sid");
 
                 return { message: "Logged out succesfully"};
             } catch (err){
@@ -70,7 +70,7 @@ const userResolver = {
     },
 
     Query: {
-        authUser: async(_, _, context) => {
+        authUser: async(_, __, context) => {
             try {
                 const user = await context.getUser()
                 return user;

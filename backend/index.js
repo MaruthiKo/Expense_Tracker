@@ -13,7 +13,7 @@ import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 
-import { GraphQLLocalStrategy, buildContext } from "graphql-passport";
+import { buildContext } from "graphql-passport";
 
 import mergedResolvers from "./resolvers/index.js";
 import mergedTypeDefs from "./typeDefs/index.js";
@@ -21,6 +21,7 @@ import { connectDB } from "./db/connectDB.js";
 import { configurePassport } from "./passport/passport.config.js";
 
 dotenv.config();
+configurePassport();
 
 const app = express();
 
@@ -46,7 +47,7 @@ app.use(
     },
     store: store
   })
-)
+);
 
 app.use(passport.initialize()); // initialzes passport for incoming requests allowing auth
 app.use(passport.session()); // used for login sessions 
@@ -63,8 +64,11 @@ await server.start();
 // Set up our Express middleware to handle CORS, body parsing,
 // and our expressMiddleware function.
 app.use(
-  '/',
-  cors(),
+  '/graphql',
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true
+  }),
   express.json(),
   // expressMiddleware accepts the same arguments:
   // an Apollo Server instance and optional configuration options
